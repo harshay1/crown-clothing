@@ -13,6 +13,32 @@ const config = {
     measurementId: "G-W455FB32CC"
   };
 
+  export const createUserProfileDocument = async (userAuth, additionalData) => {
+    if(!userAuth) return;
+    const userRef = firestore.doc(`users/${userAuth.uid}`);
+
+    const snapShot = await userRef.get();
+    
+    if(!snapShot.exists){
+      console.log('First Time User LoggedIn saving the data to DB');
+      
+      const {displayName, email } = userAuth;
+      const createdAt = new Date();
+
+      try {
+        await userRef.set({
+          displayName,
+          email,
+          createdAt,
+          ...additionalData
+        })
+      }catch(error) {
+        console.log('Error Creating the user', error);
+      }
+    }
+    return userRef;
+  };
+
   firebase.initializeApp(config);
 
   export const auth = firebase.auth();
